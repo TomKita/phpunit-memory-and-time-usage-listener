@@ -72,13 +72,15 @@ class TimeAndMemoryTestListener implements TestListener
         $this->memoryPeakIncrease = memory_get_peak_usage() - ($this->memoryPeakIncrease);
 
         if ($this->haveToSaveTestMeasurement($time)) {
-            $this->testMeasurementCollection[] = new TestMeasurement(
+            $testMeasurement = new TestMeasurement(
                 $test->getName(),
                 get_class($test),
                 $this->executionTime,
                 (new MemoryMeasurement($this->memoryUsage)),
                 (new MemoryMeasurement($this->memoryPeakIncrease))
             );
+            $this->testMeasurementCollection[] = $testMeasurement;
+            echo PHP_EOL . $testMeasurement->measuredInformationMessage();
         }
     }
 
@@ -152,11 +154,9 @@ class TimeAndMemoryTestListener implements TestListener
         $this->testSuitesRunning--;
 
         if ((0 === $this->testSuitesRunning) && (0 < count($this->testMeasurementCollection))) {
-            echo PHP_EOL . "Time & Memory measurement results: " . PHP_EOL;
-            $i = 1;
+            echo PHP_EOL . "| Time ms | Memory kb | Peak kb | Test |";
             foreach ($this->testMeasurementCollection as $testMeasurement) {
-                echo PHP_EOL . $i . " - " . $testMeasurement->measuredInformationMessage();
-                $i++;
+                echo PHP_EOL . $testMeasurement->measuredInformationMessage();
             }
         }
     }
